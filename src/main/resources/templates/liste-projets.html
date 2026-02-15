@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>Cartographie de Projets</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-50">
+    <div class="container mx-auto py-10">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-bold">Liste des Projets de Recherche</h2>
+            <a href="/declarer" class="bg-blue-600 text-white px-4 py-2 rounded"> Nouveau Projet</a>
+        </div>
+
+        <div class="bg-white shadow-md rounded-lg overflow-hidden">
+            <table class="min-w-full leading-normal">
+                <thead>
+                    <tr class="bg-gray-100 text-gray-600 uppercase text-sm">
+                        <th class="px-5 py-3 border-b">Titre</th>
+                        <th class="px-5 py-3 border-b">Domaine</th>
+                        <th class="px-5 py-3 border-b">Statut</th>
+                        <th class="px-5 py-3 border-b">Avancement</th>
+                        <th class="px-5 py-3 border-b">Responsable</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="p : ${projets}" class="hover:bg-gray-50">
+                        <td class="px-5 py-4 border-b text-sm" th:text="${p.titreProjet}"></td>
+                        <td class="px-5 py-4 border-b text-sm" th:text="${p.domaineRecherche}"></td>
+                        <td class="px-5 py-4 border-b text-sm">
+                            <span
+                                th:class="${p.statutProjet == 'EN_COURS' ? 'text-green-600 bg-green-100' : 'text-red-600 bg-red-100'} + ' px-2 py-1 rounded-full text-xs'"
+                                th:text="${p.statutProjet}"></span>
+                        </td>
+                        <td class="px-5 py-4 border-b text-sm">
+                            <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                <div class="bg-blue-600 h-2.5 rounded-full"
+                                    th:style="'width: ' + ${p.niveauAvancement} + '%'"></div>
+                            </div>
+                            <span th:text="${p.niveauAvancement} + '%'"></span>
+                        </td>
+                        <td class="px-5 py-4 border-b text-sm" th:text="${p.responsableProjet}"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+
+</html>

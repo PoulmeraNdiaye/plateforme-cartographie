@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Cartographie de Projets</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-size: 0.92rem;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 200px;
+            width: 100%;
+        }
+
+        .stat-card h3 {
+            font-size: 1.6rem;
+        }
+
+        .stat-card h5 {
+            font-size: 0.85rem;
+            color: #6c757d;
+        }
+
+        .table th,
+        .table td {
+            vertical-align: middle;
+            font-size: 0.85rem;
+        }
+
+        .badge-statut {
+            font-size: 0.78rem;
+            padding: 4px 8px;
+            border-radius: 12px;
+        }
+
+        .progress {
+            border-radius: 10px;
+        }
+
+        /* Modern Stats Button */
+        .btn-stats-modern,
+        .btn-stats-modern-link {
+            border: none;
+            border-radius: 16px;
+            padding: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .btn-stats-modern::before,
+        .btn-stats-modern-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn-stats-modern:hover::before,
+        .btn-stats-modern-link:hover::before {
+            left: 100%;
+        }
+
+        .btn-stats-modern:hover,
+        .btn-stats-modern-link:hover {
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 12px 32px rgba(102, 126, 234, 0.5);
+        }
+
+        .btn-stats-modern:active,
+        .btn-stats-modern-link:active {
+            transform: translateY(-2px) scale(0.98);
+        }
+
+        .btn-stats-content {
+            display: flex;
+            align-items: center;
+            padding: 20px 24px;
+            gap: 16px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .btn-stats-icon {
+            font-size: 2.5rem;
+            color: white;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.1);
+            }
+        }
+
+        .btn-stats-text {
+            flex: 1;
+            text-align: left;
+            color: white;
+        }
+
+        .btn-stats-text h5 {
+            font-weight: 600;
+            margin: 0;
+            font-size: 1.1rem;
+        }
+
+        .btn-stats-text p {
+            opacity: 0.9;
+            margin: 0;
+        }
+
+        .btn-stats-arrow {
+            font-size: 1.5rem;
+            color: white;
+            transition: transform 0.3s;
+        }
+
+        .btn-stats-modern:hover .btn-stats-arrow {
+            transform: translateX(8px);
+        }
+
+        /* Modern Charts Button */
+        .btn-charts-modern,
+        .btn-charts-modern-link {
+            border: none;
+            border-radius: 16px;
+            padding: 0;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            box-shadow: 0 8px 24px rgba(240, 147, 251, 0.4);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .btn-charts-modern::before,
+        .btn-charts-modern-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn-charts-modern:hover::before,
+        .btn-charts-modern-link:hover::before {
+            left: 100%;
+        }
+
+        .btn-charts-modern:hover,
+        .btn-charts-modern-link:hover {
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 12px 32px rgba(240, 147, 251, 0.5);
+        }
+
+        .btn-charts-modern:active,
+        .btn-charts-modern-link:active {
+            transform: translateY(-2px) scale(0.98);
+        }
+
+        .btn-charts-content {
+            display: flex;
+            align-items: center;
+            padding: 20px 24px;
+            gap: 16px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .btn-charts-icon {
+            font-size: 2.5rem;
+            color: white;
+            animation: rotate 3s linear infinite;
+        }
+
+        @keyframes rotate {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .btn-charts-text {
+            flex: 1;
+            text-align: left;
+            color: white;
+        }
+
+        .btn-charts-text h5 {
+            font-weight: 600;
+            margin: 0;
+            font-size: 1.1rem;
+        }
+
+        .btn-charts-text p {
+            opacity: 0.9;
+            margin: 0;
+        }
+
+        .btn-charts-arrow {
+            font-size: 1.5rem;
+            color: white;
+            transition: transform 0.3s;
+        }
+
+        .btn-charts-modern:hover .btn-charts-arrow {
+            transform: translateX(8px);
+        }
+    </style>
+</head>
+
+<body class="bg-light">
+
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm fixed-top">
+        <div class="container-fluid">
+            <a class="navbar-brand fw-bold" href="#"><i class="bi bi-geo-alt-fill me-2"></i>Cartographie des Projets de
+                Recherche — Gestionnaire</a>
+            <div class="navbar-text text-white ms-auto me-3">
+                <i class="bi bi-person-circle me-2"></i>
+                <span th:text="${user.prenom + ' ' + user.nom}"></span>
+            </div>
+            <form th:action="@{/logout}" method="post" class="d-inline">
+                <button type="submit" class="btn btn-sm btn-outline-light">
+                    <i class="bi bi-box-arrow-right me-1"></i>Déconnexion
+                </button>
+            </form>
+        </div>
+    </nav>
+
+    <div class="container-fluid px-4" style="padding-top: 80px;">
+
+        <h4 class="mb-3 fw-bold">
+            <i class="bi bi-speedometer2 me-2 text-primary"></i>Tableau de bord Gestionnaire
+        </h4>
+
+        <!-- ===== CARTES STATISTIQUES ===== -->
+        <div class="row g-3 mb-3">
+            <div class="col-6 col-md-3">
+                <div class="card shadow-sm border-0 h-100 stat-card" style="border-left: 4px solid #0d6efd !important;">
+                    <div class="card-body py-3 text-center">
+                        <h5 class="card-title mb-1"><i class="bi bi-folder2-open text-primary"></i> Total Projets</h5>
+                        <h3 class="fw-bold text-primary mb-0" th:text="${stats['totalProjets']}">0</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card shadow-sm border-0 h-100 stat-card" style="border-left: 4px solid #198754 !important;">
+                    <div class="card-body py-3 text-center">
+                        <h5 class="card-title mb-1"><i class="bi bi-play-circle text-success"></i> Projets en cours</h5>
+                        <h3 class="fw-bold text-success mb-0" th:text="${stats['projetsEnCours']}">0</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card shadow-sm border-0 h-100 stat-card" style="border-left: 4px solid #ffc107 !important;">
+                    <div class="card-body py-3 text-center">
+                        <h5 class="card-title mb-1"><i class="bi bi-bar-chart text-warning"></i> Avancement moyen</h5>
+                        <h3 class="fw-bold text-warning mb-0" th:text="${stats['avancementMoyen']} + '%'">0%</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card shadow-sm border-0 h-100 stat-card" style="border-left: 4px solid #0dcaf0 !important;">
+                    <div class="card-body py-3 text-center">
+                        <h5 class="card-title mb-1"><i class="bi bi-cash-stack text-info"></i> Budget total</h5>
+                        <h3 class="fw-bold text-info mb-0"
+                            th:text="${stats['budgetTotal'] != null ? #numbers.formatDecimal(stats['budgetTotal'], 1, 'POINT', 0, 'COMMA') + ' F' : '—'}">
+                            —</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- BOUTONS MODERNES POUR STATISTIQUES ET GRAPHIQUES -->
+        <div class="row g-3 mb-3">
+            <div class="col-md-6">
+                <a href="/manager/statistics" class="btn-stats-modern-link w-100 text-decoration-none d-block">
+                    <div class="btn-stats-content">
+                        <div class="btn-stats-icon">
+                            <i class="bi bi-graph-up-arrow"></i>
+                        </div>
+                        <div class="btn-stats-text">
+                            <h5 class="mb-1">Visualiser les Statistiques</h5>
+                            <p class="mb-0 small">Voir toutes les statistiques détaillées de vos projets</p>
+                        </div>
+                        <div class="btn-stats-arrow">
+                            <i class="bi bi-arrow-right"></i>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-6">
+                <a href="/manager/charts" class="btn-charts-modern-link w-100 text-decoration-none d-block">
+                    <div class="btn-charts-content">
+                        <div class="btn-charts-icon">
+                            <i class="bi bi-pie-chart-fill"></i>
+                        </div>
+                        <div class="btn-charts-text">
+                            <h5 class="mb-1">Consulter tous les Graphiques</h5>
+                            <p class="mb-0 small">Analyser les données avec des graphiques interactifs</p>
+                        </div>
+                        <div class="btn-charts-arrow">
+                            <i class="bi bi-arrow-right"></i>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+
+        <!-- ===== TABLEAU DES PROJETS ===== -->
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center py-2 px-3">
+                <h6 class="mb-0">
+                    <i class="bi bi-table me-1"></i>Tous les projets
+                    <span class="badge bg-light text-primary ms-2" th:text="${#lists.size(projets)}">0</span>
+                </h6>
+                <a th:href="@{/manager/projects/new}" class="btn btn-sm btn-light">
+                    <i class="bi bi-plus-lg me-1"></i>Nouveau projet
+                </a>
+            </div>
+            <div class="card-body border-bottom p-3 bg-light">
+                <form th:action="@{/manager/dashboard}" method="get" class="d-flex">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0"><i
+                                class="bi bi-search text-muted"></i></span>
+                        <input class="form-control border-start-0 ps-0" type="search" name="keyword"
+                            placeholder="Rechercher par titre, domaine, participant..." th:value="${keyword}">
+                        <button class="btn btn-primary" type="submit">Rechercher</button>
+                    </div>
+                    <a th:if="${keyword != null && !keyword.isEmpty()}" th:href="@{/manager/dashboard}"
+                        class="btn btn-outline-secondary ms-2" title="Effacer le filtre">
+                        <i class="bi bi-x-lg"></i>
+                    </a>
+                </form>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped mb-0">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>#</th>
+                                <th>Titre</th>
+                                <th>Domaine</th>
+                                <th>Statut</th>
+                                <th>Avancement</th>
+                                <th>Budget estimé</th>
+                                <th class="text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Aucun projet -->
+                            <tr th:if="${projets == null or #lists.isEmpty(projets)}">
+                                <td colspan="7" class="text-center text-muted py-5">
+                                    <i class="bi bi-inbox fs-3 d-block mb-2"></i>
+                                    Aucun projet enregistré pour l'instant.
+                                </td>
+                            </tr>
+                            <!-- Ligne par projet -->
+                            <tr th:each="projet, iterStat : ${projets}">
+                                <td class="text-muted" th:text="${iterStat.count}"></td>
+                                <td class="fw-semibold" th:text="${projet.titreProjet}"></td>
+                                <td>
+                                    <span class="badge bg-secondary"
+                                        th:text="${projet.domaineRecherche != null ? projet.domaineRecherche : '—'}"></span>
+                                </td>
+                                <td>
+                                    <span th:switch="${projet.statutProjet}">
+                                        <span th:case="'EN_COURS'" class="badge bg-primary badge-statut">En cours</span>
+                                        <span th:case="'TERMINE'" class="badge bg-success badge-statut">Terminé</span>
+                                        <span th:case="'SUSPENDU'" class="badge bg-warning badge-statut">Suspendu</span>
+                                        <span th:case="*" class="badge bg-secondary">—</span>
+                                    </span>
+                                </td>
+                                <td style="min-width: 120px;">
+                                    <div class="progress" style="height: 18px;">
+                                        <div class="progress-bar bg-primary" role="progressbar"
+                                            th:style="'width: ' + (${projet.niveauAvancement != null ? projet.niveauAvancement : 0}) + '%'"
+                                            th:text="(${projet.niveauAvancement != null ? projet.niveauAvancement : 0}) + '%'">
+                                            0%</div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span th:if="${projet.budgetEstime != null}"
+                                        th:text="${#numbers.formatDecimal(projet.budgetEstime, 1, 'POINT', 0, 'COMMA')} + ' F'"></span>
+                                    <span th:if="${projet.budgetEstime == null}" class="text-muted">—</span>
+                                </td>
+                                <td class="text-center" style="white-space: nowrap;">
+                                    <a th:href="@{/manager/projects/view/{id}(id=${projet.id})}"
+                                        class="btn btn-sm btn-outline-info me-1" title="Voir">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a th:href="@{/manager/projects/participants/{id}(id=${projet.id})}"
+                                        class="btn btn-sm btn-outline-info me-1"
+                                        title="Affecter participants (Candidats)">
+                                        <i class="bi bi-people"></i>
+                                    </a>
+                                    <a th:href="@{/manager/projects/participants-external/{id}(id=${projet.id})}"
+                                        class="btn btn-sm btn-outline-secondary me-1"
+                                        title="Ajouter autres participants">
+                                        <i class="bi bi-person-plus-fill"></i>
+                                    </a>
+                                    <a th:href="@{/manager/projects/edit/{id}(id=${projet.id})}"
+                                        class="btn btn-sm btn-outline-primary me-1" title="Modifier">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <form th:action="@{/manager/projects/delete/{id}(id=${projet.id})}" method="post"
+                                        class="d-inline"
+                                        onsubmit="return confirm('Supprimer ce projet définitivement ?')">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Supprimer">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card-footer text-muted text-end py-2 px-3 bg-light"
+                th:if="${projets != null and !#lists.isEmpty(projets)}">
+                <small th:text="${#lists.size(projets)} + ' projet(s) affiché(s)'"></small>
+            </div>
+        </div>
+
+    </div><!-- /container-fluid -->
+
+    <script th:inline="javascript">
+        // Smooth scroll functions for modern buttons
+        function scrollToStats() {
+            const statsSection = document.querySelector('.row.g-3.mb-3');
+            if (statsSection) {
+                statsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+
+        function scrollToCharts() {
+            const chartsSection = document.getElementById('domaineChart');
+            if (chartsSection) {
+                chartsSection.closest('.row').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

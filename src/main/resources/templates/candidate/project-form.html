@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Cartographie de Projets</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+</head>
+
+<body class="bg-light">
+
+    <div class="container py-5">
+        <div class="card shadow mx-auto" style="max-width: 920px;">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0" th:text="${project?.id != null} ? 'Modifier le projet' : 'Déclarer un nouveau projet'">
+                </h4>
+            </div>
+
+            <div class="card-body">
+                <form th:action="@{/candidate/projects/save}" th:object="${project}" method="post" novalidate>
+
+                    <input type="hidden" th:field="*{id}" />
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold required">Titre du projet</label>
+                        <input type="text" th:field="*{titreProjet}" class="form-control" required maxlength="250">
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('titreProjet')}"
+                            th:errors="*{titreProjet}"></div>
+                    </div>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold required">Domaine de recherche</label>
+                            <select th:field="*{domaineRecherche}" class="form-select" required>
+                                <option value="">-- Choisir un domaine --</option>
+                                <option th:each="d : ${domaines}" th:value="${d}" th:text="${d}"></option>
+                            </select>
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('domaineRecherche')}"
+                                th:errors="*{domaineRecherche}"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold required">Institution</label>
+                            <input type="text" th:field="*{institution}" class="form-control" required>
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('institution')}"
+                                th:errors="*{institution}"></div>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Responsable / Encadrant</label>
+                            <input type="text" th:field="*{responsableProjet}" class="form-control">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Budget estimé (CFA)</label>
+                            <input type="number" th:field="*{budgetEstime}" class="form-control" min="0" step="1000"
+                                placeholder="ex: 15000000">
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Date de début</label>
+                            <input type="date" th:field="*{dateDebut}" class="form-control">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Date de fin prévue</label>
+                            <input type="date" th:field="*{dateFin}" class="form-control">
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Niveau d’avancement (%)</label>
+                            <input type="number" th:field="*{niveauAvancement}" class="form-control" min="0" max="100"
+                                step="1">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold required">Statut</label>
+                            <select th:field="*{statutProjet}" class="form-select" required>
+                                <option value="">-- Sélectionner --</option>
+                                <option value="EN_COURS">En cours</option>
+                                <option value="SUSPENDU">Suspendu</option>
+                                <option value="TERMINE">Terminé</option>
+                            </select>
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('statutProjet')}"
+                                th:errors="*{statutProjet}"></div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Liste des participants</label>
+                        <textarea th:field="*{listeParticipants}" class="form-control" rows="4"
+                            placeholder="Un participant par ligne&#10;Exemple :&#10;Jean Dupont&#10;Marie Ndiaye&#10;Dr. Abdou Sow"></textarea>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Description détaillée</label>
+                        <textarea th:field="*{description}" class="form-control" rows="7" maxlength="6000"></textarea>
+                    </div>
+
+                    <div class="d-flex justify-content-between border-top pt-4">
+                        <a th:href="@{/candidate/dashboard}" class="btn btn-outline-secondary px-4">Annuler</a>
+                        <button type="submit" class="btn btn-primary px-5">
+                            <i class="bi bi-save me-2"></i>Enregistrer
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Activation simple de la validation Bootstrap -->
+    <script>
+        document.querySelectorAll('form').forEach(form => {
+            form.addEventListener('submit', e => {
+                if (!form.checkValidity()) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    </script>
+</body>
+
+</html>

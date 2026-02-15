@@ -1,0 +1,52 @@
+# Compiled class files
+*.class
+target/
+build/
+
+# Log files
+*.log
+
+# Package Files
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# IDE files
+.idea/
+*.iml
+*.iws
+.vscode/
+.settings/
+.classpath
+.project
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Application properties (contient des mots de passe)
+# NE PAS commiter les fichiers avec des informations sensibles
+application-prod.properties
+application-local.properties
+
+# Base de données locale
+*.db
+*.sqlite
+
+# Fichiers temporaires
+*.tmp
+*.bak
+*.swp
+*~
+
+# Maven
+.mvn/
+mvnw
+mvnw.cmd
+
+# Spring Boot
+HELP.md

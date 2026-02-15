@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Graphiques - Cartographie de Projets</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .charts-container {
+            padding: 2rem 0;
+        }
+
+        .page-header {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .chart-card {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s ease;
+        }
+
+        .chart-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .chart-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .chart-title i {
+            margin-right: 0.5rem;
+            color: #f5576c;
+        }
+
+        .btn-back {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            border: none;
+            color: white;
+            padding: 0.75rem 2rem;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-back:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(245, 87, 108, 0.4);
+            color: white;
+        }
+
+        canvas {
+            max-height: 400px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container charts-container">
+        <!-- Header -->
+        <div class="page-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="mb-2"><i class="bi bi-pie-chart-fill me-2"></i>Graphiques de Gestion</h1>
+                    <p class="text-muted mb-0">Visualisation de vos données de projets</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <button onclick="window.print()" class="btn btn-primary d-print-none">
+                        <i class="bi bi-printer me-2"></i>Imprimer / PDF
+                    </button>
+                    <a th:href="@{/manager/dashboard}" class="btn btn-back d-print-none">
+                        <i class="bi bi-arrow-left me-2"></i>Retour au Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Graphiques -->
+        <div class="row">
+            <!-- Répartition par Domaine -->
+            <div class="col-md-6">
+                <div class="chart-card">
+                    <div class="chart-title">
+                        <i class="bi bi-diagram-3-fill"></i>
+                        Répartition par Domaine de Recherche
+                    </div>
+                    <canvas id="domaineChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Répartition par Statut -->
+            <div class="col-md-6">
+                <div class="chart-card">
+                    <div class="chart-title">
+                        <i class="bi bi-clipboard-data-fill"></i>
+                        Répartition par Statut de Projet
+                    </div>
+                    <canvas id="statutChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Évolution des Projets -->
+            <div class="col-md-12">
+                <div class="chart-card">
+                    <div class="chart-title">
+                        <i class="bi bi-graph-up"></i>
+                        Vue d'Ensemble des Projets
+                    </div>
+                    <canvas id="overviewChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Nouvelle rangée pour les graphiques supplémentaires -->
+        <div class="row">
+            <!-- Projets par Participant -->
+            <div class="col-md-6">
+                <div class="chart-card">
+                    <div class="chart-title">
+                        <i class="bi bi-person-check-fill"></i>
+                        Projets par Participant
+                    </div>
+                    <canvas id="participantsChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Budget par Domaine -->
+            <div class="col-md-6">
+                <div class="chart-card">
+                    <div class="chart-title">
+                        <i class="bi bi-cash-coin"></i>
+                        Budget par Domaine de Recherche
+                    </div>
+                    <canvas id="budgetChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Évolution Mensuelle (pleine largeur) -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="chart-card">
+                    <div class="chart-title">
+                        <i class="bi bi-graph-up-arrow"></i>
+                        Évolution Mensuelle des Projets (12 derniers mois)
+                    </div>
+                    <canvas id="evolutionChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script th:inline="javascript">
+        // Données depuis le serveur
+        const stats = /*[[${stats}]]*/ {};
+
+        // Configuration commune
+        const commonOptions = {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 15,
+                        font: { size: 12, weight: '600' }
+                    }
+                }
+            }
+        };
+
+        // Graphique Domaines - Utiliser les données formatées du service
+        new Chart(document.getElementById('domaineChart'), {
+            type: 'doughnut',
+            data: {
+                labels: /*[[${stats['domainesLabels']}]]*/[],
+                datasets: [{
+                    data: /*[[${stats['domainesData']}]]*/[],
+                    backgroundColor: [
+                        '#667eea', '#764ba2', '#f093fb', '#f5576c',
+                        '#4facfe', '#00f2fe', '#43e97b', '#38f9d7'
+                    ],
+                    borderWidth: 2,
+                    borderColor: '#fff'
+                }]
+            },
+            options: commonOptions
+        });
+
+        // Graphique Statuts
+        new Chart(document.getElementById('statutChart'), {
+            type: 'pie',
+            data: {
+                labels: ['En Cours', 'Terminés', 'Suspendus'],
+                datasets: [{
+                    data: [
+                        /*[[${stats['projetsEnCours']}]]*/ 0,
+                        /*[[${stats['projetsTermines']}]]*/ 0,
+                        /*[[${stats['projetsSuspendus']}]]*/ 0
+                    ],
+                    backgroundColor: ['#4facfe', '#43e97b', '#fa709a'],
+                    borderWidth: 2,
+                    borderColor: '#fff'
+                }]
+            },
+            options: commonOptions
+        });
+
+        // Graphique Overview (Bar)
+        new Chart(document.getElementById('overviewChart'), {
+            type: 'bar',
+            data: {
+                labels: ['Total', 'En Cours', 'Terminés', 'Suspendus'],
+                datasets: [{
+                    label: 'Nombre de Projets',
+                    data: [
+                        /*[[${stats['totalProjets']}]]*/ 0,
+                        /*[[${stats['projetsEnCours']}]]*/ 0,
+                        /*[[${stats['projetsTermines']}]]*/ 0,
+                        /*[[${stats['projetsSuspendus']}]]*/ 0
+                    ],
+                    backgroundColor: [
+                        'rgba(102, 126, 234, 0.8)',
+                        'rgba(79, 172, 254, 0.8)',
+                        'rgba(67, 233, 123, 0.8)',
+                        'rgba(250, 112, 154, 0.8)'
+                    ],
+                    borderColor: [
+                        '#667eea', '#4facfe', '#43e97b', '#fa709a'
+                    ],
+                    borderWidth: 2,
+                    borderRadius: 8
+                }]
+            },
+            options: {
+                ...commonOptions,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { stepSize: 1 }
+                    }
+                }
+            }
+        });
+
+        // Graphique Projets par Participant (Bar)
+        new Chart(document.getElementById('participantsChart'), {
+            type: 'bar',
+            data: {
+                labels: /*[[${stats['participantsLabels']}]]*/[],
+                datasets: [{
+                    label: 'Nombre de Projets',
+                    data: /*[[${stats['participantsData']}]]*/[],
+                    backgroundColor: 'rgba(102, 126, 234, 0.8)',
+                    borderColor: '#667eea',
+                    borderWidth: 2,
+                    borderRadius: 8
+                }]
+            },
+            options: {
+                ...commonOptions,
+                indexAxis: 'y', // Barres horizontales
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        ticks: { stepSize: 1 }
+                    }
+                }
+            }
+        });
+
+        // Graphique Budget par Domaine (Bar)
+        new Chart(document.getElementById('budgetChart'), {
+            type: 'bar',
+            data: {
+                labels: /*[[${stats['budgetDomainesLabels']}]]*/[],
+                datasets: [{
+                    label: 'Budget Estimé (F CFA)',
+                    data: /*[[${stats['budgetDomainesData']}]]*/[],
+                    backgroundColor: 'rgba(67, 233, 123, 0.8)',
+                    borderColor: '#43e97b',
+                    borderWidth: 2,
+                    borderRadius: 8
+                }]
+            },
+            options: {
+                ...commonOptions,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function (value) {
+                                return value.toLocaleString('fr-FR') + ' F';
+                            }
+                        }
+                    }
+                },
+                plugins: {
+                    ...commonOptions.plugins,
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                return context.dataset.label + ': ' +
+                                    context.parsed.y.toLocaleString('fr-FR') + ' F CFA';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Graphique Évolution Mensuelle (Line)
+        new Chart(document.getElementById('evolutionChart'), {
+            type: 'line',
+            data: {
+                labels: /*[[${advancedStats['moisLabels']}]]*/[],
+                datasets: [{
+                    label: 'Projets Créés',
+                    data: /*[[${advancedStats['projectsGrowthData']}]]*/[],
+                    borderColor: '#f5576c',
+                    backgroundColor: 'rgba(245, 87, 108, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 5,
+                    pointHoverRadius: 7,
+                    pointBackgroundColor: '#f5576c',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2
+                }]
+            },
+            options: {
+                ...commonOptions,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { stepSize: 1 }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>

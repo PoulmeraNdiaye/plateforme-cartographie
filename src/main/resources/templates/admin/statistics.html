@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Statistiques - Cartographie de Projets</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .stats-container {
+            padding: 2rem 0;
+        }
+
+        .page-header {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+        }
+
+        .icon-purple {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .icon-blue {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+
+        .icon-green {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            color: white;
+        }
+
+        .icon-orange {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            color: white;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #2d3748;
+            margin: 0.5rem 0;
+        }
+
+        .stat-label {
+            color: #718096;
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        .btn-back {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            padding: 0.75rem 2rem;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-back:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+            color: white;
+        }
+
+        .table-card {
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        .table thead th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            font-weight: 600;
+        }
+
+        .badge-status {
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container stats-container">
+        <!-- Header -->
+        <div class="page-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="mb-2"><i class="bi bi-graph-up-arrow me-2"></i>Statistiques Détaillées</h1>
+                    <p class="text-muted mb-0">Vue d'ensemble complète des projets et utilisateurs</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <button onclick="window.print()" class="btn btn-primary d-print-none">
+                        <i class="bi bi-printer me-2"></i>Imprimer / PDF
+                    </button>
+                    <a th:href="@{/admin/dashboard}" class="btn btn-back d-print-none">
+                        <i class="bi bi-arrow-left me-2"></i>Retour au Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistiques Principales -->
+        <div class="row">
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-icon icon-purple">
+                        <i class="bi bi-folder-fill"></i>
+                    </div>
+                    <div class="stat-value" th:text="${stats['totalProjets']}">0</div>
+                    <div class="stat-label">Total Projets</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-icon icon-blue">
+                        <i class="bi bi-play-circle-fill"></i>
+                    </div>
+                    <div class="stat-value" th:text="${stats['projetsEnCours']}">0</div>
+                    <div class="stat-label">Projets En Cours</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-icon icon-green">
+                        <i class="bi bi-check-circle-fill"></i>
+                    </div>
+                    <div class="stat-value" th:text="${stats['projetsTermines']}">0</div>
+                    <div class="stat-label">Projets Terminés</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-icon icon-orange">
+                        <i class="bi bi-pause-circle-fill"></i>
+                    </div>
+                    <div class="stat-value" th:text="${stats['projetsSuspendus']}">0</div>
+                    <div class="stat-label">Projets Suspendus</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistiques Utilisateurs -->
+        <div class="row mt-4">
+            <div class="col-md-4">
+                <div class="stat-card">
+                    <div class="stat-icon icon-purple">
+                        <i class="bi bi-people-fill"></i>
+                    </div>
+                    <div class="stat-value" th:text="${stats['totalUtilisateurs']}">0</div>
+                    <div class="stat-label">Total Utilisateurs</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-card">
+                    <div class="stat-icon icon-blue">
+                        <i class="bi bi-person-badge-fill"></i>
+                    </div>
+                    <div class="stat-value" th:text="${stats['candidats']}">0</div>
+                    <div class="stat-label">Candidats</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-card">
+                    <div class="stat-icon icon-green">
+                        <i class="bi bi-person-gear-fill"></i>
+                    </div>
+                    <div class="stat-value" th:text="${stats['gestionnaires']}">0</div>
+                    <div class="stat-label">Gestionnaires</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistiques Avancées -->
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <div class="stat-card">
+                    <h5 class="mb-3"><i class="bi bi-speedometer2 me-2"></i>Avancement Moyen</h5>
+                    <div class="progress" style="height: 30px; border-radius: 10px;">
+                        <div class="progress-bar bg-success" role="progressbar"
+                            th:style="'width: ' + ${stats['avancementMoyen']} + '%'"
+                            th:attr="aria-valuenow=${stats['avancementMoyen']}">
+                            <span th:text="${#numbers.formatDecimal(stats['avancementMoyen'], 1, 1)} + '%'">0%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="stat-card">
+                    <h5 class="mb-3"><i class="bi bi-cash-stack me-2"></i>Budget Total</h5>
+                    <div class="stat-value text-success">
+                        <span th:text="${#numbers.formatDecimal(stats['budgetTotal'], 0, 'COMMA', 0, 'POINT')}">0</span>
+                        FCFA
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Répartition par Domaine -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="table-card">
+                    <h5 class="mb-3"><i class="bi bi-diagram-3-fill me-2"></i>Répartition par Domaine de Recherche</h5>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Domaine</th>
+                                    <th>Nombre de Projets</th>
+                                    <th>Pourcentage</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="entry : ${stats['repartitionDomaines']}">
+                                    <td th:text="${entry.key}">Domaine</td>
+                                    <td><span class="badge bg-primary" th:text="${entry.value}">0</span></td>
+                                    <td>
+                                        <div class="progress" style="height: 20px;">
+                                            <div class="progress-bar" role="progressbar"
+                                                th:style="'width: ' + ${entry.value * 100 / stats['totalProjets']} + '%'"
+                                                th:text="${#numbers.formatDecimal(entry.value * 100 / stats['totalProjets'], 1, 1)} + '%'">
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Projets par Participant -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="table-card">
+                    <h5 class="mb-3"><i class="bi bi-people-fill me-2"></i>Nombre de Projets par Participant</h5>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Participant</th>
+                                    <th>Email</th>
+                                    <th>Nombre de Projets</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="entry : ${stats['projectsByParticipant']}">
+                                    <td th:text="${entry.value['nom']}">Nom Complet</td>
+                                    <td th:text="${entry.value['email']}">email@example.com</td>
+                                    <td><span class="badge bg-success" th:text="${entry.value['count']}">0</span></td>
+                                </tr>
+                                <tr th:if="${stats['projectsByParticipant'].isEmpty()}">
+                                    <td colspan="3" class="text-center text-muted">Aucun participant trouvé</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Budget par Domaine -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="table-card">
+                    <h5 class="mb-3"><i class="bi bi-cash-stack me-2"></i>Budget Total par Domaine de Recherche</h5>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Domaine</th>
+                                    <th>Budget Total (FCFA)</th>
+                                    <th>Pourcentage</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="entry : ${stats['budgetByDomaine']}">
+                                    <td th:text="${entry.key}">Domaine</td>
+                                    <td class="text-success fw-bold">
+                                        <span
+                                            th:text="${#numbers.formatDecimal(entry.value, 0, 'COMMA', 0, 'POINT')}">0</span>
+                                        FCFA
+                                    </td>
+                                    <td>
+                                        <div class="progress" style="height: 20px;">
+                                            <div class="progress-bar bg-success" role="progressbar"
+                                                th:style="'width: ' + ${entry.value * 100 / stats['budgetTotal']} + '%'"
+                                                th:text="${#numbers.formatDecimal(entry.value * 100 / stats['budgetTotal'], 1, 1)} + '%'">
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

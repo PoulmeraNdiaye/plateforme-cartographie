@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Cartographie de Projets</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        .table th,
+        .table td {
+            vertical-align: middle;
+        }
+
+        .role-badge {
+            min-width: 110px;
+            text-align: center;
+            display: inline-block;
+        }
+
+        .role-badge .badge {
+            font-size: 0.85rem;
+            padding: 0.4rem 0.8rem;
+            font-weight: 500;
+        }
+
+        .action-btn {
+            min-width: 38px;
+        }
+
+        .btn-group-sm>.btn {
+            padding: 0.25rem 0.5rem;
+        }
+    </style>
+</head>
+
+<body class="bg-light">
+
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm fixed-top">
+        <div class="container-fluid px-4">
+            <a class="navbar-brand fw-bold" th:href="@{/admin/dashboard}">
+                <i class="bi bi-geo-alt-fill me-2"></i>Cartographie des Projets de Recherche — Administration
+            </a>
+            <div class="navbar-text text-white ms-auto me-3">
+                <i class="bi bi-person-shield me-2"></i>
+                <span th:text="${user?.prenom + ' ' + user?.nom} ?: 'Admin'"></span>
+            </div>
+            <form th:action="@{/logout}" method="post" class="d-inline">
+                <button type="submit" class="btn btn-sm btn-outline-light">
+                    <i class="bi bi-box-arrow-right me-1"></i>Déconnexion
+                </button>
+            </form>
+        </div>
+    </nav>
+
+    <div class="container-fluid px-4" style="padding-top: 80px;">
+
+        <!-- FIL D'ARIANE -->
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a th:href="@{/admin/dashboard}">Dashboard</a></li>
+                <li class="breadcrumb-item active">Utilisateurs</li>
+            </ol>
+        </nav>
+
+        <!-- MESSAGES FLASH -->
+        <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i><span th:text="${success}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i><span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <!-- BARRE D'ACTIONS ET RECHERCHE -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <form th:action="@{/admin/users}" method="get" class="d-flex flex-grow-1 me-3" style="max-width: 500px;">
+                <div class="input-group shadow-sm">
+                    <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+                    <input class="form-control border-start-0 ps-0" type="search" name="keyword"
+                        placeholder="Rechercher par nom, email..." th:value="${keyword}">
+                    <button class="btn btn-primary" type="submit">Rechercher</button>
+                    <a th:if="${keyword != null && !keyword.isEmpty()}" th:href="@{/admin/users}"
+                        class="btn btn-outline-secondary border-start-0" title="Effacer">
+                        <i class="bi bi-x-lg"></i>
+                    </a>
+                </div>
+            </form>
+            <button class="btn btn-success shadow-sm" data-bs-toggle="modal" data-bs-target="#addUserModal">
+                <i class="bi bi-person-plus-fill me-2"></i>Nouvel utilisateur
+            </button>
+        </div>
+
+        <!-- TABLEAU -->
+        <div class="card shadow border-0">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped mb-0">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>#</th>
+                                <th>Nom complet</th>
+                                <th>Email</th>
+                                <th>Rôle</th>
+                                <th>Institution</th>
+                                <th>Statut</th>
+                                <th class="text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:if="${#lists.isEmpty(users)}">
+                                <td colspan="7" class="text-center text-muted py-5">
+                                    <i class="bi bi-people fs-3 d-block mb-3"></i>
+                                    Aucun utilisateur enregistré pour le moment
+                                </td>
+                            </tr>
+                            <tr th:each="u, iter : ${users}">
+                                <td th:text="${iter.count}"></td>
+                                <td>
+                                    <div class="fw-semibold" th:text="${u.prenom} + ' ' + ${u.nom}"></div>
+                                    <small class="text-muted" th:text="${u.specialite} ?: ''"></small>
+                                </td>
+                                <td th:text="${u.email}"></td>
+                                <td class="role-badge">
+                                    <span th:if="${u.role == 'ROLE_ADMIN'}" class="badge bg-secondary">ADMIN</span>
+                                    <span th:if="${u.role == 'ROLE_GESTIONNAIRE'}"
+                                        class="badge bg-secondary">GESTIONNAIRE</span>
+                                    <span th:if="${u.role == 'ROLE_CANDIDAT'}"
+                                        class="badge bg-secondary">CANDIDAT</span>
+                                </td>
+                                <td th:text="${u.institution} ?: '—'"></td>
+                                <td>
+                                    <span th:if="${u.active}" class="badge bg-success">
+                                        <i class="bi bi-check2 me-1"></i>Actif
+                                    </span>
+                                    <span th:unless="${u.active}" class="badge bg-secondary">
+                                        <i class="bi bi-x me-1"></i>Inactif
+                                    </span>
+                                </td>
+                                <td class="text-center">
+                                    <div class="btn-group btn-group-sm">
+                                        <button class="btn btn-outline-info" title="Changer rôle" data-bs-toggle="modal"
+                                            th:attr="data-bs-target='#roleModal' + ${u.id}">
+                                            <i class="bi bi-person-gear"></i>
+                                        </button>
+                                        <form th:action="@{/admin/users/toggle-active/{id}(id=${u.id})}" method="post"
+                                            class="d-inline">
+                                            <button type="submit" class="btn"
+                                                th:classappend="${u.active} ? 'btn-outline-warning' : 'btn-outline-success'"
+                                                th:title="${u.active} ? 'Désactiver' : 'Activer'">
+                                                <i th:classappend="${u.active} ? 'bi-toggle-on' : 'bi-toggle-off'"></i>
+                                            </button>
+                                        </form>
+                                        <form th:action="@{/admin/users/delete/{id}(id=${u.id})}" method="post"
+                                            class="d-inline"
+                                            onsubmit="return confirm('Supprimer définitivement cet utilisateur ?')">
+                                            <button type="submit" class="btn btn-outline-danger" title="Supprimer">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card-footer text-end text-muted small">
+                <span th:text="${#lists.size(users)} + ' utilisateur(s) au total'"></span>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- MODALS CHANGEMENT DE RÔLE -->
+    <div th:each="u : ${users}">
+        <div class="modal fade" th:id="'roleModal' + ${u.id}" tabindex="-1" aria-labelledby="'roleLabel' + ${u.id}">
+            <div class="modal-dialog modal-dialog-centered modal-sm">
+                <div class="modal-content">
+                    <form th:action="@{/admin/users/change-role/{id}(id=${u.id})}" method="post">
+                        <div class="modal-header bg-primary text-white">
+                            <h6 class="modal-title" th:id="'roleLabel' + ${u.id}">
+                                <i class="bi bi-person-gear me-2"></i>Changer le rôle
+                            </h6>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p class="mb-3">
+                                <strong th:text="${u.prenom + ' ' + u.nom}"></strong><br>
+                                <small class="text-muted" th:text="${u.email}"></small>
+                            </p>
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Modifier le rôle</label>
+                                <select name="role" class="form-select" required>
+                                    <option value="CANDIDAT" th:selected="${u.role == 'ROLE_CANDIDAT'}">Candidat
+                                    </option>
+                                    <option value="GESTIONNAIRE" th:selected="${u.role == 'ROLE_GESTIONNAIRE'}">
+                                        Gestionnaire</option>
+                                    <option value="ADMIN" th:selected="${u.role == 'ROLE_ADMIN'}">Administrateur
+                                    </option>
+                                </select>
+                            </div>
+                            <small class="form-text text-muted d-block mt-2">
+                                <i class="bi bi-info-circle me-1"></i>Le rôle sera enregistré avec le préfixe ROLE_ dans
+                                la base de données
+                            </small>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-sm btn-secondary"
+                                data-bs-dismiss="modal">Annuler</button>
+                            <button type="submit" class="btn btn-sm btn-primary">
+                                <i class="bi bi-check2 me-1"></i>Appliquer
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL AJOUT UTILISATEUR -->
+    <div class="modal fade" id="addUserModal" tabindex="-1" aria-labelledby="addUserLabel">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form th:action="@{/admin/users/create}" method="post">
+                    <div class="modal-header bg-success text-white">
+                        <h5 class="modal-title" id="addUserLabel">
+                            <i class="bi bi-person-plus-fill me-2"></i>Nouvel utilisateur
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Prénom *</label>
+                                <input type="text" name="prenom" class="form-control" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Nom *</label>
+                                <input type="text" name="nom" class="form-control" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">Email *</label>
+                                <input type="email" name="email" class="form-control" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Mot de passe *</label>
+                                <input type="password" name="password" class="form-control" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Rôle *</label>
+                                <select name="role" class="form-select" required>
+                                    <option value="CANDIDAT">Candidat</option>
+                                    <option value="GESTIONNAIRE">Gestionnaire</option>
+                                    <option value="ADMIN">Administrateur</option>
+                                </select>
+                            </div>
+
+                        </div>
+                        <small class="form-text text-muted d-block mt-3">
+                            <i class="bi bi-info-circle me-1"></i>Les rôles seront enregistrés avec le préfixe ROLE_
+                            dans la base de données
+                        </small>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-person-check me-1"></i>Créer
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

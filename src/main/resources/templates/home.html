@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cartographie de Projets</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .hero-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 100px 0;
+        }
+
+        .feature-card {
+            border: none;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+        <div class="container">
+            <a class="navbar-brand fw-bold text-primary" href="/"><i class="bi bi-geo-alt-fill me-2"></i>Cartographie
+                des Projets de Recherche</a>
+            <div class="d-flex">
+                <a th:href="@{/login}" class="btn btn-outline-primary me-2">Connexion</a>
+                <a th:href="@{/register}" class="btn btn-primary">Inscription</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section text-center">
+        <div class="container">
+            <h1 class="display-4 fw-bold mb-4">Plateforme de Cartographie des Projets de Recherche</h1>
+            <p class="lead mb-4">Gérez, suivez et collaborez sur vos projets de recherche en toute simplicité</p>
+            <a th:href="@{/register}" class="btn btn-light btn-lg px-5">Commencer Maintenant</a>
+        </div>
+    </section>
+
+    <!-- Features -->
+    <section class="py-5">
+        <div class="container">
+            <h2 class="text-center mb-5">Fonctionnalités Principales</h2>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="card feature-card h-100">
+                        <div class="card-body text-center p-4">
+                            <div class="bg-primary bg-opacity-10 rounded-circle d-inline-flex p-3 mb-3">
+                                <i class="bi bi-folder text-primary" style="font-size: 2rem;"></i>
+                            </div>
+                            <h4 class="card-title">Gestion des Projets</h4>
+                            <p class="card-text">Déclarez et suivez l'avancement de vos projets de recherche en temps
+                                réel.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card feature-card h-100">
+                        <div class="card-body text-center p-4">
+                            <div class="bg-success bg-opacity-10 rounded-circle d-inline-flex p-3 mb-3">
+                                <i class="bi bi-graph-up text-success" style="font-size: 2rem;"></i>
+                            </div>
+                            <h4 class="card-title">Tableaux de Bord</h4>
+                            <p class="card-text">Visualisez vos statistiques et indicateurs de performance
+                                personnalisés.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card feature-card h-100">
+                        <div class="card-body text-center p-4">
+                            <div class="bg-info bg-opacity-10 rounded-circle d-inline-flex p-3 mb-3">
+                                <i class="bi bi-people text-info" style="font-size: 2rem;"></i>
+                            </div>
+                            <h4 class="card-title">Collaboration</h4>
+                            <p class="card-text">Travaillez en équipe et collaborez efficacement avec vos superviseurs.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Call to Action -->
+    <section class="bg-light py-5">
+        <div class="container text-center">
+            <h2 class="mb-4">Prêt à gérer vos projets de recherche ?</h2>
+            <p class="lead mb-4">Rejoignez notre plateforme dès aujourd'hui et simplifiez la gestion de vos projets.</p>
+            <div class="d-flex justify-content-center gap-3">
+                <a th:href="@{/register}" class="btn btn-primary btn-lg px-4">S'inscrire Gratuitement</a>
+                <a th:href="@{/login}" class="btn btn-outline-primary btn-lg px-4">Se Connecter</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-4">
+        <div class="container text-center">
+            <p class="mb-0">© 2024 ESMT ISI - Plateforme de Cartographie des Projets. Tous droits réservés.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Cartographie de Projets</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+</head>
+
+<body class="bg-light">
+
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm fixed-top">
+        <div class="container-fluid px-4">
+            <a class="navbar-brand fw-bold" th:href="@{/admin/dashboard}">
+                <i class="bi bi-geo-alt-fill me-2"></i>Cartographie des Projets de Recherche — Administration
+            </a>
+            <div class="navbar-text text-white ms-auto me-3">
+                <i class="bi bi-person-shield me-2"></i>
+                <span th:text="${user?.prenom + ' ' + user?.nom} ?: 'Admin'"></span>
+            </div>
+            <form th:action="@{/logout}" method="post" class="d-inline">
+                <button type="submit" class="btn btn-sm btn-outline-light">
+                    <i class="bi bi-box-arrow-right me-1"></i>Déconnexion
+                </button>
+            </form>
+        </div>
+    </nav>
+
+    <div class="container-fluid px-4" style="padding-top: 80px;">
+
+        <!-- FIL D'ARIANE -->
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a th:href="@{/admin/dashboard}">Dashboard</a></li>
+                <li class="breadcrumb-item active">Paramètres</li>
+            </ol>
+        </nav>
+
+        <!-- HEADER -->
+        <div class="mb-4">
+            <h2 class="fw-bold text-primary"><i class="bi bi-gear-fill me-2"></i>Paramètres Système</h2>
+            <p class="text-muted">Configuration globale de la plateforme.</p>
+        </div>
+
+        <!-- ALERTS -->
+        <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i><span th:text="${success}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="card shadow border-0">
+                    <div class="card-header bg-white fw-bold py-3">
+                        <i class="bi bi-sliders me-2"></i>Configuration Générale
+                    </div>
+                    <div class="card-body p-4">
+                        <form th:action="@{/admin/settings/update}" method="post" th:object="${config}">
+
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Nom de la Plateforme</label>
+                                <input type="text" class="form-control" th:field="*{siteName}" required>
+                                <div class="form-text">Ce nom apparaîtra sur la page d'accueil et les en-têtes.</div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Email de Contact Support</label>
+                                <input type="email" class="form-control" th:field="*{contactEmail}" required>
+                            </div>
+
+                            <hr class="my-4">
+
+                            <div class="mb-3 form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="registrationOpen"
+                                    th:field="*{registrationOpen}">
+                                <label class="form-check-label fw-semibold" for="registrationOpen">Ouverture des
+                                    Inscriptions</label>
+                                <div class="form-text">Si désactivé, les nouveaux utilisateurs ne pourront plus
+                                    s'inscrire eux-mêmes.</div>
+                            </div>
+
+                            <div class="mb-4 form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="maintenanceMode"
+                                    th:field="*{maintenanceMode}">
+                                <label class="form-check-label fw-semibold text-danger" for="maintenanceMode">Mode
+                                    Maintenance</label>
+                                <div class="form-text">Activez ce mode pour bloquer l'accès aux utilisateurs non-admin
+                                    temporairement.</div>
+                            </div>
+
+                            <div class="d-flex justify-content-end">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-save me-1"></i>Enregistrer les modifications
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="card shadow border-0 mb-4">
+                    <div class="card-header bg-white fw-bold py-3">
+                        <i class="bi bi-info-circle me-2"></i>Informations Système
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item d-flex justify-content-between">
+                                <span>Version Application</span>
+                                <span class="badge bg-secondary" th:text="${config.version}">1.0.0</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between">
+                                <span>Environnement</span>
+                                <span class="badge bg-success">Production</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between">
+                                <span>Base de données</span>
+                                <span class="badge bg-info text-dark">MySQL</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    <strong>Attention :</strong> Le mode maintenance déconnectera tous les utilisateurs non
+                    administrateurs.
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
